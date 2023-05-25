@@ -1,0 +1,54 @@
+service: crud-service
+
+provider:
+  name: aws
+  runtime: nodejs14.x
+  region: us-east-1
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - dynamodb:PutItem
+        - dynamodb:GetItem
+        - dynamodb:UpdateItem
+        - dynamodb:DeleteItem
+      Resource: "arn:aws:dynamodb:us-east-1:123456789012:table/table-item"
+
+functions:
+  createItem:
+    handler: src/createItem.createItem
+    events:
+      - http:
+          path: items
+          method: post
+  getItem:
+    handler: src/getItem.getItem
+    events:
+      - http:
+          path: items/{id}
+          method: get
+  updateItem:
+    handler: src/updateItem.updateItem
+    events:
+      - http:
+          path: items/{id}
+          method: put
+  deleteItem:
+    handler: src/deleteItem.deleteItem
+    events:
+      - http:
+          path: items/{id}
+          method: delete
+
+resources:
+  Resources:
+    MyDynamoDbTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: table-item
+        BillingMode: PAY_PER_REQUEST
+        AttributeDefinitions:
+          - AttributeName: id
+            AttributeType: S
+        KeySchema:
+          - AttributeName: id
+            KeyType: HASH
